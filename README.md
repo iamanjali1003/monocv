@@ -1,24 +1,24 @@
-# monoCV
+![monoCV](.github/banner.png)
 
 A free resume builder that produces clean, ATS-friendly resumes. Fill in a guided
 form, watch the preview update as you type, and export a PDF that parsers can
 actually read.
 
-## Why
+## Overview
 
-Most resume builders either lock the export behind a paywall or generate a PDF
+Most resume builders either lock the export behind a paywall or produce a PDF
 full of tables, columns and icons that applicant tracking systems fail to parse.
 monoCV keeps the output deliberately plain so the text extracts cleanly, while
 the editing experience stays pleasant.
 
 ## Features
 
-- **Guided form** covering personal info, education, experience, projects and skills
-- **Live preview** that re-renders as you type
-- **PDF export** rendered from the same data through `@react-pdf/renderer`
-- **Drafts survive reloads** — state is persisted to `localStorage`
-- **Type-safe input** — every form is validated against a Zod schema
-- **Modular templates** — adding a new design means adding one folder
+- A guided form covering personal info, education, experience, projects and skills
+- A live preview that re-renders as you type
+- PDF export rendered from the same data through `@react-pdf/renderer`
+- Drafts survive reloads, because state is persisted to `localStorage`
+- Every form is validated against a Zod schema
+- Adding a new design means adding one folder
 
 ## Tech stack
 
@@ -31,7 +31,17 @@ the editing experience stays pleasant.
 | PDF | `@react-pdf/renderer` |
 | Package manager | pnpm |
 
-## How it fits together
+## How it works
+
+```
+   guided form  ──(Zod)──>  Zustand store  ──(persist)──>  localStorage
+                                 │
+                       one Resume object
+                        ┌────────┴────────┐
+                        v                 v
+                 preview.tsx           pdf.tsx
+              (React, on screen)   (react-pdf, export)
+```
 
 **One source of truth.** A single `Resume` object lives in a Zustand store
 (`src/lib/store.ts`). The `persist` middleware mirrors it to `localStorage`, so a
@@ -43,27 +53,11 @@ React Hook Form validates against it before anything reaches the store, so the
 store only ever holds well-formed data.
 
 **Templates are pluggable.** `src/templates/registry.ts` maps a template id to a
-`ResumeTemplate`. Each template supplies two renderers over the same data — a
+`ResumeTemplate`. Each template supplies two renderers over the same data: a
 React component for the on-screen preview and a `@react-pdf` component for the
-exported file. Adding a template means creating a folder with `preview.tsx`,
-`pdf.tsx` and `index.ts`, then registering it; nothing else changes.
+exported file.
 
-```
-src/
-├── app/                  # routes: landing, templates gallery, builder
-├── components/
-│   ├── forms/            # one form per resume section
-│   └── ui/               # shadcn/ui primitives
-├── lib/
-│   ├── store.ts          # Zustand store + localStorage persistence
-│   ├── schemas.ts        # Zod validation schemas
-│   └── types.ts          # Resume data model
-└── templates/
-    ├── registry.ts       # id -> template lookup
-    └── classic/          # preview.tsx (screen) + pdf.tsx (export)
-```
-
-## Running it locally
+## Getting started
 
 Requires Node 20+ and pnpm.
 
@@ -94,6 +88,23 @@ pnpm lint     # ESLint
 
 Set `available: false` to keep a work-in-progress template out of the gallery.
 
+## Project structure
+
+```
+src/
+├── app/                  routes: landing, templates gallery, builder
+├── components/
+│   ├── forms/            one form per resume section
+│   └── ui/               shadcn/ui primitives
+├── lib/
+│   ├── store.ts          Zustand store + localStorage persistence
+│   ├── schemas.ts        Zod validation schemas
+│   └── types.ts          Resume data model
+└── templates/
+    ├── registry.ts       id -> template lookup
+    └── classic/          preview.tsx (screen) + pdf.tsx (export)
+```
+
 ## License
 
-MIT
+[MIT](LICENSE) © 2026 [Anjali](https://iamanjali1003.github.io)
